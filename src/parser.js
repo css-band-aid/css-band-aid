@@ -28,8 +28,7 @@ function calculateSelectorLength(rule) {
   }
 }
 
-function *chunks(source) {
-  let ast = css.parse(source);
+function *chunks(ast) {
   let rules = ast.stylesheet.rules;
   let splitRules = [];
   let selectorCount = 0;
@@ -51,11 +50,12 @@ function *chunks(source) {
   yield createAst(splitRules);
 }
 
-export default function parse(source) {
+export default function parse(code, options) {
+  let fullAst = css.parse(code, options);
   let totalSelectorCount = 0;
   let data = [];
 
-  for(let { ast, selectorCount } of chunks(source)) {
+  for(let { ast, selectorCount } of chunks(fullAst)) {
     totalSelectorCount += selectorCount;
     data.push(css.stringify(ast));
   }

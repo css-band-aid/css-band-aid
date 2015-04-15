@@ -14,47 +14,33 @@ const outputDebugDir = path.join(__dirname, 'fixtures', 'output-debug', 'chunk')
 let ensureDebugDir = ensureDir(outputDebugDirRoot)
   .then(() => ensureDir(outputDebugDir));
 
-function testParserResults(fixtureName, result) {
+function assertExpectations(data, index, fixtureName, suffix) {
+  let outputFixtureFilename = index + suffix;
   let outputDebugFolder = path.join(outputDebugDir, fixtureName);
   let ensureFixtureDebugDir = ensureDebugDir.then(() => ensureDir(outputDebugFolder));
+  let outputFixtureFilepath = path.join(outputFixturesDir, fixtureName, outputFixtureFilename);
+  let outputDebugFilepath = path.join(outputDebugFolder, outputFixtureFilename);
 
-  let dataChecks = result.data.map((chunkData, index) => {
-    let outputFixtureFilename = index + '.css';
-    let outputFixtureFilepath = path.join(outputFixturesDir, fixtureName, outputFixtureFilename);
-    let outputDebugFilepath = path.join(outputDebugFolder, outputFixtureFilename);
+  return ensureFixtureDebugDir
+    .then(() => Promise.all([
+        fsp.readFile(outputFixtureFilepath, { encoding: 'utf8' }),
+        fsp.writeFile(outputDebugFilepath, data)
+      ])
+      .then(([d, ]) => d)
+    )
+    .then(outputFixtureData => {
+      let safeData = data.replace(/\s+/g, '');
+      let safeOutputFixtureData = outputFixtureData.replace(/\s+/g, '');
+      expect(safeData).to.equal(safeOutputFixtureData);
+    });
+}
 
-    return ensureFixtureDebugDir
-      .then(() => Promise.all([
-          fsp.readFile(outputFixtureFilepath, { encoding: 'utf8' }),
-          fsp.writeFile(outputDebugFilepath, chunkData)
-        ])
-        .then(([d, ]) => d)
-      )
-      .then(outputFixtureData => {
-        let safeChunkData = chunkData.replace(/\s+/g, '');
-        let sageOutputFixtureData = outputFixtureData.replace(/\s+/g, '');
-        expect(safeChunkData).to.equal(sageOutputFixtureData);
-      });
-  });
+function testParserResults(fixtureName, result) {
+  let dataChecks = result.data.map((chunkData, index) => assertExpectations(chunkData, index, fixtureName, '.css'));
 
   let sourceChecks = result.maps.map((sourcemap, index) => {
-    let outputFixtureFilename = index + '.css.map';
-    let outputFixtureFilepath = path.join(outputFixturesDir, fixtureName, outputFixtureFilename);
-    let outputDebugFilepath = path.join(outputDebugFolder, outputFixtureFilename);
     let sourcemapString = JSON.stringify(sourcemap);
-
-    return ensureFixtureDebugDir
-      .then(() => Promise.all([
-          fsp.readFile(outputFixtureFilepath, { encoding: 'utf8' }),
-          fsp.writeFile(outputDebugFilepath, sourcemapString)
-        ])
-        .then(([d, ]) => d)
-      )
-      .then(outputFixtureData => {
-        let safeChunkData = sourcemapString.replace(/\s+/g, '');
-        let sageOutputFixtureData = outputFixtureData.replace(/\s+/g, '');
-        expect(safeChunkData).to.equal(sageOutputFixtureData);
-      });
+    return assertExpectations(sourcemapString, index, fixtureName, '.css.map');
   });
 
   return Promise.all([dataChecks, sourceChecks]);

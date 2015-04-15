@@ -12,7 +12,7 @@ function executeChunk(input, outputDir, chunkOptions) {
   let basename = path.basename(input, '.css');
 
   return chunkFile(input, chunkOptions)
-    .then(({data, maps, totalSelectorCount}) => {
+    .then(({data, maps}) => {
       let chunks = data.map((ast, index) => {
         let outputFilename = path.join(outputDir, `${basename}.${index}.css`);
 
@@ -21,12 +21,12 @@ function executeChunk(input, outputDir, chunkOptions) {
 
       let sourcemaps = maps.map((sourcemap, index) => {
         let outputFilename = path.join(outputDir, `${basename}.${index}.css.map`);
+        let sourcemapString = JSON.stringify(sourcemap);
 
-        return fsp.writeFile(outputFilename, JSON.stringify(sourcemap));
+        return fsp.writeFile(outputFilename, sourcemapString);
       });
 
-      return Promise.all([chunks, sourcemaps])
-        .then(([chunks, ]) => chunks);
+      return Promise.all([chunks, sourcemaps]).then(([chunks, ]) => chunks);
     });
 }
 

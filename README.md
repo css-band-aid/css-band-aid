@@ -44,13 +44,13 @@ options:
 
 returns:
   data                    An array of css strings for each css chunk
-  maps                    An array of css sourcemap strings for each css chunk. This will be empty if source is not provided or sourcemaps is not enabled
+  maps                    An array of css sourcemap objects for each css chunk. This will be empty if source is not provided or sourcemaps is not enabled
   totalSelectorCount      The total number of selectors in the provided css
 
 example:
   var parsedData = chunk(code, { source: './path/to/css.css' });
   parsedCss.data                  //An array of css strings for each css chunk
-  parsedCss.maps                  //An array of css sourcemap strings for each css chunk. This is empty if source is empty or sourcemaps is false.
+  parsedCss.maps                  //An array of css sourcemap objects for each css chunk. This is empty if source is empty or sourcemaps is false.
   parsedCss.totalSelectorCount    //The total number of selectors in the provided css file
 ```
 
@@ -66,7 +66,7 @@ returns:
 example:
   chunkfile('./path/to/css.css').then(function(parsedCss, { sourcemaps: true }) {
     parsedCss.data                  //An array of css strings for each css chunk
-    parsedCss.maps                  //An array of css sourcemap strings for each css chunk. This will be empty if sourcemaps is false.
+    parsedCss.maps                  //An array of css sourcemap objects for each css chunk. This will be empty if sourcemaps is false.
     parsedCss.totalSelectorCount    //The total number of selectors in the provided css file
   });
 ```

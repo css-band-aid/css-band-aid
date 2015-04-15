@@ -1,5 +1,5 @@
 /* eslint no-process-exit: 0 */
-import colors from 'colors';
+import 'colors';
 import yargs from 'yargs';
 import common from './common-yargs';
 import { chunkFile } from '../index';
